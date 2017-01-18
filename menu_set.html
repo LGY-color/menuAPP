@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<title></title>
+		<link href="css/mui.min.css" rel="stylesheet" />
+	</head>
+
+	<body>
+		<header class="mui-bar mui-bar-nav" style="padding-right: 15px;">
+			<a class="mui-action-back mui-icon mui-icon-left-nav mui-pull-left"></a>
+			<h1 class="mui-title">商品设置</h1>
+			<button id='setting' class=" mui-pull-right mui-btn-link">设置</button>
+		</header>
+		<div class="mui-content">
+			<div class="mui-content-padded">
+				<form class="mui-input-group">
+					<div class="mui-input-row">
+						<label>商品类</label>
+						<input type="text" placeholder="输入商品类名称" id="goods_class">
+					</div>
+					<div class="mui-input-row">
+						<label>商品名</label>
+						<input type="text" placeholder="输入商品名称" id="goods_name">
+					</div>
+					<div class="mui-input-row">
+						<label>价格</label>
+						<input type="text" placeholder="输入价格" id="goods_money">
+					</div>
+					<div class="mui-button-row">
+						<button type="button" class="mui-btn mui-btn-primary" id="sureBtn">确认</button>&nbsp;&nbsp;
+						<button type="button" class="mui-btn mui-btn-danger" id="cancalBtn">取消</button>
+					</div>
+				</form>
+				
+
+				<!--<button  class="mui-btn mui-btn-block mui-btn-primary">设置</button>-->
+				<!--
+				<button id='exit' class="mui-btn mui-btn-block mui-btn-green">关闭</button>
+                <button id='logout' class="mui-btn mui-btn-red mui-btn-block">注销登录</button>
+                -->
+			</div>
+		</div>
+		<footer style="margin-top: 50px;">
+			<nav class="mui-bar mui-bar-tab">
+				<a class="mui-tab-item" id="nav_menu">
+					<span class="mui-icon mui-icon-home"></span>
+					<span class="mui-tab-label">订单</span>
+				</a>
+				<a class="mui-tab-item" id="nav_order">
+					<span class="mui-icon mui-icon-phone"></span>
+					<span class="mui-tab-label">点单</span>
+				</a>
+				<a class="mui-tab-item" id="nav_look">
+					<span class="mui-icon mui-icon-email"></span>
+					<span class="mui-tab-label">查看</span>
+				</a>
+				<a class="mui-tab-item" id="nav_set">
+					<span class="mui-icon mui-icon-gear"></span>
+					<span class="mui-tab-label">设置</span>
+				</a>
+			</nav>
+		</footer>
+		<script src="js/mui.min.js"></script>
+		<script src="js/app.js"></script>
+		<script src="js/bmob.js"></script>
+		
+		<script>
+			(function($, doc) {
+				$.init();
+				var sureBtn = document.getElementById('sureBtn');
+				var cancalBtn = document.getElementById('cancalBtn');
+				console.log(sureBtn);
+				sureBtn.addEventListener("tap",function () {
+					var goods_class = document.getElementById('goods_class').value;
+					var goods_name = document.getElementById('goods_name').value;
+					var goods_money = document.getElementById('goods_money').value;
+					if(goods_class == '' || goods_name =='' || goods_money == ''){
+						mui.toast('填写不能为空')
+					}else{
+						saveData(goods_class,goods_name,goods_money);
+					}
+				});
+			}(mui, document));
+			function saveData(gClass,gName,gMoney){
+				Bmob.initialize("c7b687660d46f201685d4f10e235ec52", "7f9bd0546af5843edd6595d268712db2");
+				var menu = Bmob.Object.extend("menu");
+				var menuData = new menu();
+//				menuData.set("gClass", gClass);
+//				menuData.set("gName", gName);
+//				menuData.set("gMoney", parseInt(gMoney));
+				//添加数据，第一个入口参数是null
+				menuData.save({
+					gClass: gClass,
+					gName: gName,
+					gMoney: parseInt(gMoney)
+				}, {
+					success: function(menuData) {
+						// 添加成功，返回成功之后的objectId（注意：返回的属性名字是id，不是objectId），你还可以在Bmob的Web管理后台看到对应的数据
+						//alert('添加数据成功，返回的objectId是：' + gameScore.id);
+						mui.toast('添加成功');
+					},
+					error: function(menuData, error) {
+						// 添加失败
+						/*alert('添加数据失败，返回错误信息：' + error.description);*/
+						mui.toast('添加失败，检查一下哪里没填。');
+					}
+				});
+			}
+		</script>
+		<script type="text/javascript">
+			document.getElementById('nav_menu').addEventListener('tap', function() {
+				mui.openWindow({
+					url: 'menu_main.html',
+					id: 'menu_main.html',
+					
+					createNew: true, //是否重复创建同样id的webview，默认为false:不重复创建，直接显示
+				});
+			});
+			document.getElementById('nav_order').addEventListener('tap', function() {
+				mui.openWindow({
+					url: 'order.html',
+					id: 'order.html',
+					
+					createNew: true, //是否重复创建同样id的webview，默认为false:不重复创建，直接显示
+				});
+			});
+			document.getElementById('nav_look').addEventListener('tap', function() {
+				mui.openWindow({
+					url: 'menu_list.html',
+					id: 'menu_list.html',
+					
+					createNew: true, //是否重复创建同样id的webview，默认为false:不重复创建，直接显示
+				});
+			});
+			document.getElementById('nav_set').addEventListener('tap', function() {
+				mui.openWindow({
+					url: 'menu_set.html',
+					id: 'menu_set.html',
+					
+					createNew: true, //是否重复创建同样id的webview，默认为false:不重复创建，直接显示
+				});
+			});
+		</script>
+	</body>
+
+</html>

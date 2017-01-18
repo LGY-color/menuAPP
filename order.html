@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<title></title>
+		<link href="css/mui.min.css" rel="stylesheet" />
+		<link href="css/mui.picker.css" rel="stylesheet" />
+		<link href="css/mui.poppicker.css" rel="stylesheet" />
+		<style type="text/css">
+			.mui-card {
+				margin: 0px;
+			}
+		</style>
+	</head>
+
+	<body>
+		<header class="mui-bar mui-bar-nav" style="padding-right: 15px;">
+			<a class="mui-action-back mui-icon mui-icon-left-nav mui-pull-left"></a>
+			<h1 class="mui-title">点单管理</h1>
+			<!--<button id='setting' class=" mui-pull-right mui-btn-link">设置</button>-->
+		</header>
+		<div class="mui-content">
+			<div class="mui-content-padded">
+				<button id='showCityPicker' class="mui-btn mui-btn-block" type='button'>选择商品</button>
+				<h4 style="text-align: center;">商品规格</h4>
+
+				<div class="mui-card">
+					<!--<div class="mui-card-content">-->
+					<table border="1" style="text-align: center;width: 100%;" id="menu-list">
+
+						<tr id="menu-tr">
+							<th style="width: 55%;padding: 5px;">品种</th>
+							<th style="width: 25%;">数量</th>
+							<th style="width: 20%;">操作</th>
+						</tr>
+						<!--<tr>
+							<td>西红柿鸡蛋排骨面</td>
+							<td>
+								<div class="mui-numbox">
+									<button class="mui-btn mui-btn-numbox-minus" type="button">-</button>
+									<input class="mui-input-numbox" type="number" />
+									<button class="mui-btn mui-btn-numbox-plus" type="button">+</button>
+								</div>
+							</td>
+							<td>
+								<button type="button" class="mui-btn mui-btn-danger">删除</button>
+							</td>
+						</tr>-->
+
+					</table>
+					<button type="button" class="mui-btn mui-btn-success mui-btn-block" style="margin-top: 10px;" onclick="upMenu()">确认</button>
+					<button type="button" class="mui-btn mui-btn-danger mui-btn-block">取消</button>
+					<!--</div>-->
+				</div>
+			</div>
+		</div>
+		<footer style="margin-top: 50px;">
+			<nav class="mui-bar mui-bar-tab">
+				<a class="mui-tab-item" id="nav_menu">
+					<span class="mui-icon mui-icon-home"></span>
+					<span class="mui-tab-label">订单</span>
+				</a>
+				<a class="mui-tab-item" >
+					<span class="mui-icon mui-icon-phone" id="nav_order"></span>
+					<span class="mui-tab-label">点单</span>
+				</a>
+				<a class="mui-tab-item" >
+					<span class="mui-icon mui-icon-email" id="nav_look"></span>
+					<span class="mui-tab-label">查看</span>
+				</a>
+				<a class="mui-tab-item"  id="nav_set">
+					<span class="mui-icon mui-icon-gear"></span>
+					<span class="mui-tab-label">设置</span>
+				</a>
+			</nav>
+		</footer>
+		<script src="js/mui.min.js"></script>
+		<script src="js/mui.picker.js"></script>
+		<script src="js/mui.poppicker.js"></script>
+		<script src="js/bmob.js"></script>
+		<script src="js/city.data.js" type="text/javascript" charset="utf-8"></script>
+		<script src="js/app.js"></script>
+		<script>
+			var gClass = [],
+				menuObject = [],
+				menuData = [],
+				menuObj = {};
+			(function($, doc) {
+				$.init();
+				//选择器二级联动
+				//级联示例
+				queryData();
+
+			}(mui, document));
+			//取出数据
+			function queryData() {
+				Bmob.initialize("c7b687660d46f201685d4f10e235ec52", "7f9bd0546af5843edd6595d268712db2");
+				//查询大类
+				var menu = Bmob.Object.extend("menu");
+				var query = new Bmob.Query(menu);
+				// 查询所有数据
+				query.find({
+					success: function(results) {
+						/*console.log(results);*/
+						for(var i = 0; i < results.length; i++) {
+							var object = results[i];
+							gClass[i] = object.get('gClass');
+							/*gName[i] = object.get('gName');
+							gMoney[i] = object.get('gMoney');*/
+							/*console.log(object.id + ' - ' + object.get('gClass'));*/
+							menuObject[i] = results[i]._serverData;
+						}
+						gClass = uniqueArray(gClass);
+						//数据处理
+						dealMenu();
+						console.log(menuData);
+						//设置菜单
+						setMenu();
+					},
+					error: function(error) {
+						alert("查询失败: " + error.code + " " + error.message);
+					}
+				});
+
+			}
+			//处理数据 去除重复类
+			function uniqueArray(data) {
+				data = data || [];
+				var a = [];
+				for(var i = 0; i < data.length; i++) {
+					var v = data[i];
+					if(typeof(a[v]) == 'undefined') {
+						a[v] = 1;
+					}
+				};
+				data.length = 0;
+				for(var i in a) {
+					data[data.length] = i;
+				}
+				return data;
+			}
+			//数据处理
+			function dealMenu() {
+				for(var i = 0; i < gClass.length; i++) {
+					menuData[i] = {};
+					menuData[i].value = gClass[i];
+					menuData[i].text = gClass[i];
+					menuData[i].children = [];
+				}
+				for(var j = 0; j < menuObject.length; j++) {
+					selectClass(menuObject[j].gClass, j);
+				}
+			}
+			//选择赋值
+			function setMenu() {
+				mui.ready(function() {
+					var cityPicker = new mui.PopPicker({
+						layer: 2
+					});
+					/*var menuData = [{
+						value: '北京市',
+						text: '北京市',
+						children: [{
+							value: '北京市',
+							text: '北京市',
+						}]
+					}];
+					console.log(menuData[0].value);*/
+					cityPicker.setData(menuData);
+					var showCityPickerButton = document.getElementById('showCityPicker');
+					var cityResult = document.getElementById('cityResult');
+					showCityPickerButton.addEventListener('tap', function(event) {
+						cityPicker.show(function(items) {
+							/*cityResult.innerText = "你选择的城市是:" + items[0].text + " " + items[1].text;*/
+							console.log("你选择的城市是:" + items[0].text + " " + items[1].text + " " + items[1].money);
+							//插入节点
+							insertNode(items[1].text, items[1].money);
+							//返回 false 可以阻止选择框的关闭
+							//return false;
+							/*console.log(document.getElementById('menu-list').innerHTML);*/
+						});
+					}, false);
+				});
+			}
+			//商品归类
+			function selectClass(els, n) {
+				var obj = {};
+				for(var i = 0, length1 = gClass.length; i < length1; i++) {
+					switch(els) {
+						case gClass[i]:
+							obj.value = menuObject[n].gName;
+							obj.text = menuObject[n].gName;
+							obj.money = menuObject[n].gMoney;
+							menuData[i].children.push(obj);
+							break;
+						case gClass[i]:
+							obj.value = menuObject[n].gName;
+							obj.text = menuObject[n].gName;
+							obj.money = menuObject[n].gMoney;
+							menuData[i].children.push(obj);
+							break;
+						case gClass[i]:
+							obj.value = menuObject[n].gName;
+							obj.text = menuObject[n].gName;
+							obj.money = menuObject[n].gMoney;
+							menuData[i].children.push(obj);
+							break;
+						default:
+							break;
+					}
+				}
+			}
+			//处理点击事件
+			function dealBtn(els) {
+				var num = parseInt(els.parentNode.childNodes[1].value);
+				if(els.innerHTML == '-') {
+					els.parentNode.childNodes[1].value = parseInt(num) - 1;
+				} else if(els.innerHTML == '+') {
+					els.parentNode.childNodes[1].value = parseInt(num) + 1;
+				}
+
+			}
+			//插入菜单节点 新插之后
+			/*function insertNode(oname, omoney) {
+				var fNode = document.getElementById("menu-list");
+				var newNode = document.createElement("tr");
+				newNode.innerHTML = '<td  class="oName">' + oname + '</td><td><label style="display:none" class="oMoney">' + omoney + '</label><div class="mui-numbox"><button class="mui-btn mui-btn-numbox-minus" type="button" onclick="dealBtn(this)">-</button><input class="mui-input-numbox oNum" type="number" value="1"/><button class="mui-btn mui-btn-numbox-plus" type="button" onclick="dealBtn(this)">+</button></div></td><td><button type="button" class="mui-btn mui-btn-danger" onclick="delNode(this)">删除</button></td>';
+				fNode.insertBefore(newNode, null);
+			}*/
+			//插入菜单节点 新插之前
+			function insertNode(oname, omoney) {
+				var fNode = document.getElementById("menu-tr");
+				var newNode = document.createElement("tr");
+				newNode.innerHTML = '<td  class="oName">' + oname + '</td><td><label style="display:none" class="oMoney">' + omoney + '</label><div class="mui-numbox"><button class="mui-btn mui-btn-numbox-minus" type="button" onclick="dealBtn(this)">-</button><input class="mui-input-numbox oNum" type="number" value="1"/><button class="mui-btn mui-btn-numbox-plus" type="button" onclick="dealBtn(this)">+</button></div></td><td><button type="button" class="mui-btn mui-btn-danger" onclick="delNode(this)">删除</button></td>';
+				insertAfter(newNode, fNode);
+			}
+			function insertAfter(newEl, targetEl) {
+				var parentEl = targetEl.parentNode;
+				if(parentEl.lastChild == targetEl) {
+					parentEl.appendChild(newEl);
+				} else {
+					parentEl.insertBefore(newEl, targetEl.nextSibling);
+				}
+			}
+			//删除元素
+			function delNode(els) {
+				var btnArray = ['确认', '取消'];
+				mui.confirm('确认删除该条订单？', '删除', btnArray, function(e) {
+					if(e.index == 0) {
+						els.parentNode.parentNode.remove();
+					}
+				});
+
+			}
+			//上传菜单
+			function upMenu() {
+				var menuListTest = [],
+					oName = document.getElementsByClassName('oName'),
+					oMoney = document.getElementsByClassName('oMoney'),
+					oNum = document.getElementsByClassName('oNum'),
+					length = document.getElementsByClassName('oName').length;
+				if(oName.length == 0){
+					mui.toast('不能为空单');
+					return false;
+				}
+				for(var i = 0; i < length; i++) {
+					var menuOne = {};
+					menuOne.oName = oName[i].innerHTML;
+					menuOne.oMoney = oMoney[i].innerHTML;
+					menuOne.oNum = oNum[i].value;
+					menuListTest[i] = menuOne;
+				}
+				var order = Bmob.Object.extend("order");
+				var orderMenu = new order();
+				// 添加数据，第一个入口参数是Json数据
+				orderMenu.save({
+				  orderList: menuListTest,
+				  orderStatus: 0,
+				  orderPay: 0
+				}, {
+				  success: function(gameScore) {
+				    // 添加成功
+				    mui.toast('下单成功');
+				  },
+				  error: function(gameScore, error) {
+				    // 添加失败
+				    mui.toast('下单失败');
+				  }
+				});
+				/*console.log(menuListTest);*/
+				/*console.log(document.getElementsByClassName('oName'));
+				console.log(document.getElementsByClassName('oMoney'));
+				console.log(document.getElementsByClassName('oNum'));*/
+			}
+		</script>
+		<script type="text/javascript">
+			document.getElementById('nav_menu').addEventListener('tap', function() {
+				mui.openWindow({
+					url: 'menu_main.html',
+					id: 'menu_main.html',
+					
+					createNew: true, //是否重复创建同样id的webview，默认为false:不重复创建，直接显示
+				});
+			});
+			document.getElementById('nav_order').addEventListener('tap', function() {
+				mui.openWindow({
+					url: 'order.html',
+					id: 'order.html',
+					
+					createNew: true, //是否重复创建同样id的webview，默认为false:不重复创建，直接显示
+				});
+			});
+			document.getElementById('nav_look').addEventListener('tap', function() {
+				mui.openWindow({
+					url: 'menu_list.html',
+					id: 'menu_list.html',
+					
+					createNew: true, //是否重复创建同样id的webview，默认为false:不重复创建，直接显示
+				});
+			});
+			document.getElementById('nav_set').addEventListener('tap', function() {
+				mui.openWindow({
+					url: 'menu_set.html',
+					id: 'menu_set.html',
+					
+					createNew: true, //是否重复创建同样id的webview，默认为false:不重复创建，直接显示
+				});
+			});
+		</script>
+	</body>
+
+</html>

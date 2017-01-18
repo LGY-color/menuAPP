@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<title></title>
+		<link href="css/mui.min.css" rel="stylesheet" />
+	</head>
+	<style>
+		.mui-card .mui-control-content {
+			padding: 10px;
+		}
+		.mui-control-content {
+			height: 75vh;
+		}
+		.mui-table-view-cell{
+			padding: 0;
+		}
+	</style>
+
+	<body>
+		<header class="mui-bar mui-bar-nav" style="padding-right: 15px;">
+			<a class="mui-action-back mui-icon mui-icon-left-nav mui-pull-left"></a>
+			<h1 class="mui-title">订单中心</h1>
+			<!--<button id='setting' class=" mui-pull-right mui-btn-link">设置</button>-->
+		</header>
+		<div class="mui-content">
+			<div class="mui-content-padded">
+				<div>
+					<div id="segmentedControl" class="mui-segmented-control">
+						<a class="mui-control-item" href="#item1" id="no-do">未完成</a>
+						<a class="mui-control-item mui-active" href="#item2" id="no-pay">未支付</a>
+						<a class="mui-control-item" href="#item3" id="do-pay">已完成</a>
+					</div>
+				</div>
+				<div>
+					<div id="item2" class="mui-control-content mui-active">
+						<div id="scroll2" class="mui-scroll-wrapper">
+                            <div class="mui-scroll">
+                                <ul class="mui-table-view" id="off-off">
+                                    <li class="mui-table-view-cell">
+                                        <div class="mui-card">
+                                            <div class="mui-card-header">
+                                                <span style="font-size: 14px;">{{time}}</span> 订单情况:
+                                                <div class="mui-switch mui-active" onclick="changeSw(this)" id="d_{{g_id}}">
+                                                    <div class="mui-switch-handle"></div>
+                                                </div>
+                                            </div>
+                                            <div class="mui-card-content">
+                                                <div class="mui-card-content-inner">
+                                                    <table border="1" style="text-align: center;" id="{{o_id}}">
+                                                        <tr>
+                                                            <th style="width: 45vw;">品种</th>
+                                                            <th style="width: 20vw;">数量</th>
+                                                            <th style="width: 20vw;">金额</th>
+                                                        </tr>
+                                                        <!--<tr>
+                                                            <td>西红柿鸡蛋排骨面</td>
+                                                            <td>3</td>
+                                                            <td>9999</td>
+                                                        </tr>-->
+                                                    </table>
+                                                </div>
+                                            </div>
+                                            <div class="mui-card-footer">
+                                                <span>共计：<label style="color: red;">{{money}}</label>元</span>
+                                                支付情况:
+                                                <div class="mui-switch"  onclick="changeSw(this)" id="p_{{g_id}}">
+                                                    <div class="mui-switch-handle"></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </li>
+                                </ul>
+                            </div>
+						</div>
+					</div>
+				</div>
+				<!--<button  class="mui-btn mui-btn-block mui-btn-primary">设置</button>-->
+				<!--
+				<button id='exit' class="mui-btn mui-btn-block mui-btn-green">关闭</button>
+                <button id='logout' class="mui-btn mui-btn-red mui-btn-block">注销登录</button>
+                -->
+			</div>
+		</div>
+		<footer style="margin-top: 50px;">
+			<nav class="mui-bar mui-bar-tab">
+				<a class="mui-tab-item" id="nav_menu">
+					<span class="mui-icon mui-icon-home"></span>
+					<span class="mui-tab-label">订单</span>
+				</a>
+				<a class="mui-tab-item" id="nav_order">
+					<span class="mui-icon mui-icon-phone"></span>
+					<span class="mui-tab-label">点单</span>
+				</a>
+				<a class="mui-tab-item" id="nav_look">
+					<span class="mui-icon mui-icon-email"></span>
+					<span class="mui-tab-label">查看</span>
+				</a>
+				<a class="mui-tab-item" id="nav_set">
+					<span class="mui-icon mui-icon-gear"></span>
+					<span class="mui-tab-label">设置</span>
+				</a>
+			</nav>
+		</footer>
+		<script src="js/mui.min.js"></script>
+		<script src="js/app.js"></script>
+		<script src="js/bmob.js"></script>
+		<script>
+			var menuList = [],menuMoney =[];
+			(function($) {
+				$('#scroll1').scroll({
+					indicators: true //是否显示滚动条
+				});
+				$('#scroll2').scroll({
+					indicators: true //是否显示滚动条
+				});
+				$('#scroll3').scroll({
+					indicators: true //是否显示滚动条
+				});
+				var segmentedControl = document.getElementById('segmentedControl');
+				$('.mui-input-group').on('change', 'input', function() {
+					if(this.checked) {
+						var styleEl = document.querySelector('input[name="style"]:checked');
+						var colorEl = document.querySelector('input[name="color"]:checked');
+						if(styleEl && colorEl) {
+							var style = styleEl.value;
+							var color = colorEl.value;
+							segmentedControl.className = 'mui-segmented-control' + (style ? (' mui-segmented-control-' + style) : '') + ' mui-segmented-control-' + color;
+						}
+					}
+				});
+				queryData();
+				/*document.getElementsByClassName('mui-switch').addEventListener('click',function(){
+					var els = this;
+					var clsName = els.className;
+					if(clsName == 'mui-switch'){
+						els.className +=' mui-active';
+					}else{
+						els.className ='mui-switch';
+					}
+				});*/
+				
+
+			})(mui);
+			//取出数据
+			function queryData() {
+				Bmob.initialize("c7b687660d46f201685d4f10e235ec52", "7f9bd0546af5843edd6595d268712db2");
+				//查询大类
+				var order = Bmob.Object.extend("order");
+				var query = new Bmob.Query(order);
+				query.equalTo("orderStatus", 1);
+				query.equalTo("orderPay", 0);
+				query.descending("updatedAt");
+				// 查询所有数据
+				query.find({
+					success: function(results) {
+						//						alert("共查询到 " + results.length + " 条记录");
+						// 循环处理查询到的数据
+						console.log(results);
+						for(var i = 0; i < results.length; i++) {
+							var object = results[i];
+							var osum = 0;
+							menuList[i]  = {};
+							menuList[i].oNum = results.length;
+							menuList[i].oTime = object.updatedAt;
+							menuList[i].oId = object.id;
+							menuList[i].oStatus = object.get('orderStatus');
+							menuList[i].oPay = object.get('orderPay');
+							menuList[i].oList = object.get('orderList');
+							for(var j=0;j< menuList[i].oList.length;j++){
+								var onum = menuList[i].oList[j].oNum;
+								var omoney = menuList[i].oList[j].oMoney;
+								var smoney = parseInt(onum) * parseFloat(omoney);
+								osum += smoney;
+							}
+							menuList[i].oMoney = osum;
+							/*console.log(object.id + ' - ' + object.get('gClass'));*/
+						}
+						console.log(menuList);
+						/*var kv = JSON.stringify(menuObject);*/
+
+						insertDom();
+					},
+					error: function(error) {
+						alert("查询失败: " + error.code + " " + error.message);
+					}
+				});
+			}
+			//插入dom
+			function insertDom(){
+				var offoff = document.getElementById('off-off').innerHTML;
+				var newHtml = '';
+				for(var i=0;i < menuList.length;i++){
+					newHtml += offoff.replace('{{time}}',menuList[i].oTime).replace('{{money}}',menuList[i].oMoney).replace('{{o_id}}','o_'+i).replace(/\{\{g_id\}\}/g,menuList[i].oId);
+				}
+				document.getElementById('off-off').innerHTML = newHtml;
+				for(var i=0;i < menuList.length;i++){
+					for(var j=0;j<menuList[i].oList.length;j++){
+						document.getElementById('o_'+i).innerHTML += '<tr><td>'+menuList[i].oList[j].oName+'</td><td>'+menuList[i].oList[j].oNum+'</td><td>'+menuList[i].oList[j].oMoney+'</td></tr>';
+					}
+				}
+
+			}
+			//完成与付款
+			function changeSw(els){
+				var clsName = els.className;
+				var clsId = els.id;
+				if(clsName == 'mui-switch'){
+					els.className +=' mui-active';
+					if(clsId.slice(0,1) =='d'){
+						menuDeal(clsId.slice(2),'orderStatus',1,els);
+					}else if(clsId.slice(0,1) =='p'){
+						menuDeal(clsId.slice(2),'orderPay',1,els);
+					}else{
+						mui.toast("出错了");
+					}
+				}else{
+					els.className ='mui-switch';
+					if(clsId.slice(0,1) =='d'){
+						menuDeal(clsId.slice(2),'orderStatus',0,els);
+					}else if(clsId.slice(0,1) =='p'){
+						menuDeal(clsId.slice(2),'orderPay',0,els);
+					}else{
+						mui.toast("出错了");
+					}
+				}
+			}
+			//订单处理
+			function menuDeal(oId,wOne,num,els){
+				var order = Bmob.Object.extend("order");
+				var query = new Bmob.Query(order);
+				// 这个 id 是要修改条目的 id，你在生成这个存储并成功时可以获取到，请看前面的文档
+				query.get(oId, {
+					success: function(orderListTest) {
+						// 回调中可以取得这个 orderListTest 对象的一个实例，然后就可以修改它了
+						orderListTest.set(wOne, num);
+						orderListTest.save();
+						// The object was retrieved successfully.
+						mui.toast("成功了");
+						setTimeout(function(){
+							els.parentNode.parentNode.remove();
+						},500);
+					},
+					error: function(object, error) {
+						mui.toast("出错了");
+					}
+				});
+			}
+		</script>
+		<script type="text/javascript">
+			document.getElementById('nav_menu').addEventListener('tap', function() {
+				mui.openWindow({
+					url: 'menu_main.html',
+					id: 'menu_main.html',
+					createNew: true, //是否重复创建同样id的webview，默认为false:不重复创建，直接显示
+				});
+			});
+			document.getElementById('nav_order').addEventListener('tap', function() {
+				mui.openWindow({
+					url: 'order.html',
+					id: 'order.html',
+					
+					createNew: true, //是否重复创建同样id的webview，默认为false:不重复创建，直接显示
+				});
+			});
+			document.getElementById('nav_look').addEventListener('tap', function() {
+				mui.openWindow({
+					url: 'menu_list.html',
+					id: 'menu_list.html',
+					
+					createNew: true, //是否重复创建同样id的webview，默认为false:不重复创建，直接显示
+				});
+			});
+			document.getElementById('nav_set').addEventListener('tap', function() {
+				mui.openWindow({
+					url: 'menu_set.html',
+					id: 'menu_set.html',
+					
+					createNew: true, //是否重复创建同样id的webview，默认为false:不重复创建，直接显示
+				});
+			});
+			document.getElementById('no-do').addEventListener('tap', function() {
+				mui.openWindow({
+					url: 'menu_main.html',
+					id: 'menu_main.html',
+
+					createNew: true, //是否重复创建同样id的webview，默认为false:不重复创建，直接显示
+				});
+			});
+			document.getElementById('no-pay').addEventListener('tap', function() {
+				mui.openWindow({
+					url: 'menu_main2.html',
+					id: 'menu_main2.html',
+
+					createNew: true, //是否重复创建同样id的webview，默认为false:不重复创建，直接显示
+				});
+			});
+			document.getElementById('do-pay').addEventListener('tap', function() {
+				mui.openWindow({
+					url: 'menu_main3.html',
+					id: 'menu_main3.html',
+
+					createNew: true, //是否重复创建同样id的webview，默认为false:不重复创建，直接显示
+				});
+			});
+		</script>
+	</body>
+
+</html>

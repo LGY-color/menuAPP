@@ -1,0 +1,68 @@
+{
+  "menu_list.html": {
+    "resources": [
+      "js/bmob.js",
+      "js/app.js",
+      "js/mui.min.js",
+      "fonts/mui.ttf",
+      "css/mui.min.css"
+    ],
+    "refer": [
+      "menu_set.html"
+    ]
+  },
+  "order.html": {
+    "resources": [
+      "js/bmob.js",
+      "js/app.js",
+      "js/mui.picker.js",
+      "js/mui.min.js",
+      "js/mui.poppicker.js",
+      "fonts/mui.ttf",
+      "css/mui.min.css",
+      "js/city.data.js",
+      "css/mui.poppicker.css",
+      "css/mui.picker.css"
+    ],
+    "refer": [
+      "menu_list.html",
+      "menu_main.html"
+    ]
+  },
+  "menu_main.html": {
+    "resources": [
+      "js/bmob.js",
+      "js/app.js",
+      "js/mui.min.js",
+      "fonts/mui.ttf",
+      "css/mui.min.css"
+    ],
+    "refer": [
+      "order.html",
+      "menu_set.html",
+      "menu_list.html",
+      "menu_main2.html",
+      "menu_main3.html"
+    ]
+  },
+  "menu_main2.html": {
+    "refer": [
+      "menu_main.html",
+      "menu_main3.html"
+    ],
+    "resources": []
+  },
+  "menu_main3.html": {
+    "refer": [
+      "menu_main2.html",
+      "menu_main.html",
+      "order.html"
+    ],
+    "resources": []
+  },
+  "menu_set.html": {
+    "refer": [
+      "order.html"
+    ]
+  }
+}
